@@ -1,4 +1,4 @@
-#if canImport(SwiftUI) && (canImport(AppKit) || canImport(UIKit))
+#if canImport(SwiftUI) && ((canImport(AppKit) && !targetEnvironment(macCatalyst)) || canImport(UIKit))
 import SwiftUI
 import MermaidLayout
 
@@ -86,7 +86,7 @@ extension MermaidView: Equatable {
 
 private extension Image {
     init(platformImage: PlatformImage) {
-        #if canImport(AppKit)
+        #if (canImport(AppKit) && !targetEnvironment(macCatalyst))
         self.init(nsImage: platformImage)
         #else
         self.init(uiImage: platformImage)

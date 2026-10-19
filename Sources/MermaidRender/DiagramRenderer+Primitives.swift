@@ -1,8 +1,8 @@
-#if canImport(AppKit) || canImport(UIKit) || canImport(SilicaCairo)
+#if (canImport(AppKit) && !targetEnvironment(macCatalyst)) || canImport(UIKit) || canImport(SilicaCairo)
 import Foundation
 import MermaidLayout
 
-#if canImport(AppKit)
+#if (canImport(AppKit) && !targetEnvironment(macCatalyst))
 import CoreGraphics
 import CoreText
 import AppKit
@@ -14,7 +14,7 @@ import UIKit
 
 extension DiagramRenderer {
 
-    #if canImport(AppKit) || canImport(UIKit)
+    #if (canImport(AppKit) && !targetEnvironment(macCatalyst)) || canImport(UIKit)
     static func font(_ size: CGFloat, weight: PlatformFont.Weight = .regular) -> CTFont {
         PlatformFont.systemFont(ofSize: size, weight: weight) as CTFont
     }
@@ -55,7 +55,7 @@ extension DiagramRenderer {
 
     /// Measures a single visual line (no line-break handling).
     private static func measureLine(_ text: String, size: CGFloat, weight: PlatformFont.Weight) -> CGSize {
-        #if canImport(AppKit) || canImport(UIKit)
+        #if (canImport(AppKit) && !targetEnvironment(macCatalyst)) || canImport(UIKit)
         let key = "\(size)|\(weight.rawValue)|\(text)" as NSString
         if let cached = measureCache.size(forKey: key) { return cached }
         let attributed = NSAttributedString(string: text, attributes: [
@@ -146,7 +146,7 @@ extension DiagramRenderer {
     /// no capture hook).
     private static func drawLine(_ text: String, center: CGPoint, size: CGFloat,
                                  weight: PlatformFont.Weight, color: PlatformColor, in context: CGContext) {
-        #if canImport(AppKit) || canImport(UIKit)
+        #if (canImport(AppKit) && !targetEnvironment(macCatalyst)) || canImport(UIKit)
         let attributed = NSAttributedString(string: text, attributes: [
             kCTFontAttributeName as NSAttributedString.Key: font(size, weight: weight),
             kCTForegroundColorFromContextAttributeName as NSAttributedString.Key: true,

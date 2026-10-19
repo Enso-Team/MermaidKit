@@ -1,7 +1,7 @@
-#if canImport(AppKit) || canImport(UIKit) || canImport(SilicaCairo)
+#if (canImport(AppKit) && !targetEnvironment(macCatalyst)) || canImport(UIKit) || canImport(SilicaCairo)
 import Foundation
 import MermaidLayout
-#if canImport(AppKit) || canImport(UIKit)
+#if (canImport(AppKit) && !targetEnvironment(macCatalyst)) || canImport(UIKit)
 import CoreGraphics
 #endif
 

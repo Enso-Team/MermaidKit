@@ -1,6 +1,6 @@
-#if canImport(AppKit) || canImport(UIKit) || canImport(SilicaCairo)
+#if (canImport(AppKit) && !targetEnvironment(macCatalyst)) || canImport(UIKit) || canImport(SilicaCairo)
 import Foundation
-#if canImport(AppKit)
+#if (canImport(AppKit) && !targetEnvironment(macCatalyst))
 import CoreGraphics
 import CoreText
 import AppKit
@@ -26,7 +26,7 @@ public enum MermaidRenderer {
         // Apple pulls the image back out of the cached attachment string; Linux
         // has no NSTextAttachment, so it renders directly (and uncached) via the
         // Silica backend. Same return type, different path.
-        #if canImport(AppKit) || canImport(UIKit)
+        #if (canImport(AppKit) && !targetEnvironment(macCatalyst)) || canImport(UIKit)
         guard let attr = attachmentString(source: source, theme: theme, spacing: spacing),
               attr.length > 0,
               let attachment = attr.attribute(.attachment, at: 0, effectiveRange: nil) as? NSTextAttachment
@@ -64,7 +64,7 @@ public enum MermaidRenderer {
         }
     }
 
-    #if canImport(AppKit) || canImport(UIKit)
+    #if (canImport(AppKit) && !targetEnvironment(macCatalyst)) || canImport(UIKit)
     /// The diagram as a single-attachment attributed string, for embedding in
     /// a text view (how a markdown editor embeds it). Nil when not Mermaid.
     /// Apple platforms only (NSTextAttachment); on Linux use ``image(source:theme:spacing:)`` and its
@@ -99,7 +99,7 @@ public enum MermaidRenderer {
     /// exact same layout/draw pipeline. Uncached (no source string to key on).
     public static func image(diagram: MermaidDiagram, theme: DiagramTheme,
                              spacing: DiagramSpacing = .regular) -> PlatformImage? {
-        #if canImport(AppKit) || canImport(UIKit)
+        #if (canImport(AppKit) && !targetEnvironment(macCatalyst)) || canImport(UIKit)
         return DiagramRenderer.image(for: diagram, title: nil, theme: theme, spacing: spacing)
         #elseif canImport(SilicaCairo)
         return DiagramRenderer.renderImage(diagram: diagram, title: nil, theme: theme, spacing: spacing)
@@ -155,7 +155,7 @@ public enum MermaidRenderer {
     public static func image(source: String, format: DiagramSourceFormat, theme: DiagramTheme,
                              spacing: DiagramSpacing = .regular) -> PlatformImage? {
         if format == .mermaid { return image(source: source, theme: theme, spacing: spacing) }
-        #if canImport(AppKit) || canImport(UIKit)
+        #if (canImport(AppKit) && !targetEnvironment(macCatalyst)) || canImport(UIKit)
         // Route through the cached attachment (like `image(source:)`) so a repeat
         // render of the same non-Mermaid source is a cache hit, not a re-parse.
         guard let attr = attachmentString(source: source, format: format, theme: theme, spacing: spacing),
@@ -190,7 +190,7 @@ public enum MermaidRenderer {
         MermaidAltText.describe(diagram)
     }
 
-    #if canImport(AppKit) || canImport(UIKit)
+    #if (canImport(AppKit) && !targetEnvironment(macCatalyst)) || canImport(UIKit)
     /// The diagram as a single-attachment attributed string for a source in the
     /// given `format` — the format-aware twin of
     /// ``attachmentString(source:theme:spacing:)``. Unblocks embedding DOT,
@@ -218,7 +218,7 @@ public enum MermaidRenderer {
     #endif
 
     private static func encodePNG(_ img: PlatformImage) -> Data? {
-        #if canImport(AppKit)
+        #if (canImport(AppKit) && !targetEnvironment(macCatalyst))
         var rect = CGRect(origin: .zero, size: img.size)
         guard let cg = img.cgImage(forProposedRect: &rect, context: nil, hints: nil) else { return nil }
         let data = NSMutableData()
@@ -252,7 +252,7 @@ public enum MermaidRenderer {
                                   targetWidth: Int,
                                   background: (r: UInt8, g: UInt8, b: UInt8))
         -> (pixels: [UInt8], width: Int, height: Int)? {
-        #if canImport(AppKit) || canImport(UIKit)
+        #if (canImport(AppKit) && !targetEnvironment(macCatalyst)) || canImport(UIKit)
         guard let img = image(source: source, theme: theme, spacing: spacing) else { return nil }
         return raster(from: img, targetWidth: targetWidth, background: background)
         #elseif canImport(SilicaCairo)
@@ -270,7 +270,7 @@ public enum MermaidRenderer {
                                   targetWidth: Int,
                                   background: (r: UInt8, g: UInt8, b: UInt8))
         -> (pixels: [UInt8], width: Int, height: Int)? {
-        #if canImport(AppKit) || canImport(UIKit)
+        #if (canImport(AppKit) && !targetEnvironment(macCatalyst)) || canImport(UIKit)
         guard let img = image(diagram: diagram, theme: theme, spacing: spacing) else { return nil }
         return raster(from: img, targetWidth: targetWidth, background: background)
         #elseif canImport(SilicaCairo)
@@ -282,7 +282,7 @@ public enum MermaidRenderer {
         #endif
     }
 
-    #if canImport(SilicaCairo) && !canImport(AppKit) && !canImport(UIKit)
+    #if canImport(SilicaCairo) && !(canImport(AppKit) && !targetEnvironment(macCatalyst)) && !canImport(UIKit)
     /// Extract raw RGBA pixels from a Silica (Cairo) render — the Linux/embedded
     /// raw-raster path (framebuffers, SDL, GPU upload) that has no display server
     /// and can't decode the PNG. Silica's `CGImage.data` is 8-bit premultiplied
@@ -321,7 +321,7 @@ public enum MermaidRenderer {
     /// `targetWidth` from trapping or exhausting memory.
     static let maxRasterDimension = 4096
 
-    #if canImport(AppKit) || canImport(UIKit)
+    #if (canImport(AppKit) && !targetEnvironment(macCatalyst)) || canImport(UIKit)
     private static func raster(from img: PlatformImage, targetWidth: Int,
                                background: (r: UInt8, g: UInt8, b: UInt8))
         -> (pixels: [UInt8], width: Int, height: Int)? {
@@ -330,7 +330,7 @@ public enum MermaidRenderer {
         // exhaust memory allocating `bytesPerRow * h`. A terminal is at most a
         // few hundred columns wide, so 4096 px is comfortably generous.
         guard (1...maxRasterDimension).contains(targetWidth) else { return nil }
-        #if canImport(AppKit)
+        #if (canImport(AppKit) && !targetEnvironment(macCatalyst))
         var rect = CGRect(origin: .zero, size: img.size)
         guard let cg = img.cgImage(forProposedRect: &rect, context: nil, hints: nil) else { return nil }
         #else

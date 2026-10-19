@@ -11,7 +11,7 @@
 // `canImport(SilicaCairo)` is true only where the Linux backend is linked
 // (see Package.swift's platform-conditioned dependency), so it is the precise
 // "Linux render backend available" signal.
-#if canImport(SilicaCairo) && !canImport(AppKit) && !canImport(UIKit)
+#if canImport(SilicaCairo) && !(canImport(AppKit) && !targetEnvironment(macCatalyst)) && !canImport(UIKit)
 import Foundation
 // Re-export the Silica stack module-wide so the shared render files (whose
 // CoreGraphics imports are Apple-only) see CGContext/CGColor/CGPath/CGFont,

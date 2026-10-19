@@ -1,7 +1,7 @@
-#if canImport(AppKit) || canImport(UIKit) || canImport(SilicaCairo)
+#if (canImport(AppKit) && !targetEnvironment(macCatalyst)) || canImport(UIKit) || canImport(SilicaCairo)
 import Foundation
 import MermaidLayout
-#if canImport(AppKit)
+#if (canImport(AppKit) && !targetEnvironment(macCatalyst))
 import CoreGraphics
 import CoreText
 import AppKit
@@ -27,7 +27,7 @@ extension DiagramRenderer {
         guard let (canvasSize, originX, originY) =
                 paddedCanvas(size: plan.size, edgePolylines: plan.edgePolylines) else { return nil }
 
-        #if canImport(SilicaCairo) && !canImport(AppKit) && !canImport(UIKit)
+        #if canImport(SilicaCairo) && !(canImport(AppKit) && !targetEnvironment(macCatalyst)) && !canImport(UIKit)
         // Linux: Cairo PDF surface. Silica writes to a URL, so render one page
         // to a temp file and read the bytes back. The context is flipped
         // (top-left origin) like the raster path, so the shared draw code needs
@@ -65,7 +65,7 @@ extension DiagramRenderer {
 
         // Pin appearance resolution exactly like the raster paths, so dynamic
         // platform colors resolve to the theme's variant, not the ambient one.
-        #if canImport(AppKit)
+        #if (canImport(AppKit) && !targetEnvironment(macCatalyst))
         if let appearance = NSAppearance(named: theme.prefersDark ? .darkAqua : .aqua) {
             appearance.performAsCurrentDrawingAppearance { plan.draw(context) }
         } else {

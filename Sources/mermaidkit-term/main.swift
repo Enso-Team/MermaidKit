@@ -9,7 +9,7 @@ import Android
 #elseif canImport(Bionic)
 import Bionic
 #endif
-#if canImport(AppKit) || canImport(UIKit) || canImport(SilicaCairo)
+#if (canImport(AppKit) && !targetEnvironment(macCatalyst)) || canImport(UIKit) || canImport(SilicaCairo)
 import MermaidRender
 #endif
 
@@ -318,7 +318,7 @@ func looksLikeGitLog(_ source: String) -> Bool {
 /// unavailable or the source doesn't render.
 func renderKitty(_ source: String, diagram: MermaidDiagram?,
                  background: TerminalBackground) -> Int32 {
-    #if canImport(AppKit) || canImport(UIKit) || canImport(SilicaCairo)
+    #if (canImport(AppKit) && !targetEnvironment(macCatalyst)) || canImport(UIKit) || canImport(SilicaCairo)
     let theme = DiagramTheme(prefersDark: background == .dark)
     let png = diagram.flatMap { MermaidRenderer.pngData(diagram: $0, theme: theme) }
         ?? MermaidRenderer.pngData(source: source, theme: theme)
@@ -373,7 +373,7 @@ func renderHalfBlock(_ source: String, diagram: MermaidDiagram?,
     let bg: (r: UInt8, g: UInt8, b: UInt8) =
         prefersDark ? (0x1B, 0x1B, 0x1D) : (0xFF, 0xFF, 0xFF)
 
-    #if canImport(AppKit) || canImport(UIKit) || canImport(SilicaCairo)
+    #if (canImport(AppKit) && !targetEnvironment(macCatalyst)) || canImport(UIKit) || canImport(SilicaCairo)
     let theme = DiagramTheme(prefersDark: prefersDark)
     let maybeRaster = diagram.flatMap {
         MermaidRenderer.rgbaRaster(diagram: $0, theme: theme, targetWidth: cols, background: bg)
